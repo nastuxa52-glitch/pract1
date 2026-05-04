@@ -55,14 +55,13 @@ export default {
     },
     handleQuoteClose() {
       this.showQuote = false
-      // Отправляем сохранение, но модалка не закрывается
       this.$emit('save', {
         date: this.selectedDate,
         mood: this.selectedMood.type,
         moodLabel: this.selectedMood.label,
         emoji: this.selectedMood.emoji
       })
-      // Модалка остаётся открытой, чтобы можно было добавить ещё эмоцию
+      // НЕ закрываем окно, чтобы можно было добавить ещё эмоцию
     }
   }
 }
