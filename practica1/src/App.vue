@@ -13,7 +13,7 @@
     <MiniGame v-if="showGame" @close="showGame = false" />
 
     <footer>
-      <p>Каждый день — новая эмоция ✨</p>
+      <p>✨ Каждый день — новая эмоция ✨</p>
     </footer>
   </div>
 </template>
@@ -25,7 +25,11 @@ import MiniGame from './components/MiniGame.vue'
 
 export default {
   name: 'App',
-  components: { Calendar, FloatButton, MiniGame },
+  components: {
+    Calendar,
+    FloatButton,
+    MiniGame
+  },
   data() {
     return {
       showGame: false
@@ -35,6 +39,9 @@ export default {
     window.addEventListener('open-game', () => {
       this.showGame = true
     })
+  },
+  beforeUnmount() {
+    window.removeEventListener('open-game', () => {})
   }
 }
 </script>
@@ -64,9 +71,10 @@ body {
 header {
   text-align: center;
   padding: 30px 20px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 30px;
   margin-bottom: 20px;
+  backdrop-filter: blur(5px);
 }
 
 header h1 {
@@ -85,5 +93,6 @@ footer {
   padding: 20px;
   color: #aaa;
   margin-top: auto;
+  font-size: 0.9rem;
 }
 </style>
