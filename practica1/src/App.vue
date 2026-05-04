@@ -80,7 +80,7 @@ header h1 {
 footer {
   text-align: center;
   padding: 20px;
-  color: #aaa;
+  color: #000000;
   margin-top: auto;
 }
 </style>
