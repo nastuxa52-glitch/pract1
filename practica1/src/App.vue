@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div id="app">
     <header>
       <h1>🌸 Трекер настроения</h1>
       <p>Отмечай эмоции, получай советы и поднимай настроение!</p>
@@ -39,9 +39,6 @@ export default {
     window.addEventListener('open-game', () => {
       this.showGame = true
     })
-  },
-  beforeUnmount() {
-    window.removeEventListener('open-game', () => {})
   }
 }
 </script>
@@ -54,12 +51,11 @@ export default {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #f5f0ff 0%, #ffe4e1 100%);
-  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-.app {
+#app {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
@@ -74,18 +70,11 @@ header {
   background: rgba(255, 255, 255, 0.6);
   border-radius: 30px;
   margin-bottom: 20px;
-  backdrop-filter: blur(5px);
 }
 
 header h1 {
-  font-size: 2.5rem;
-  color: #6b4c7a;
-  margin-bottom: 10px;
-}
-
-header p {
-  color: #8a6a9a;
-  font-size: 1.1rem;
+  font-size: 2rem;
+  color: #2c5f7a;
 }
 
 footer {
@@ -93,6 +82,5 @@ footer {
   padding: 20px;
   color: #aaa;
   margin-top: auto;
-  font-size: 0.9rem;
 }
 </style>
