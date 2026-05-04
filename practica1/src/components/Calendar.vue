@@ -44,7 +44,13 @@ export default {
   data() {
     return {
       date: new Date(),
-      moods: { awesome: { emoji: '🤩', score: 5 }, good: { emoji: '😊', score: 4 }, normal: { emoji: '😐', score: 3 }, sad: { emoji: '😢', score: 2 }, bad: { emoji: '😤', score: 1 } },
+      moods: {
+        awesome: { emoji: '🤩', score: 5 },
+        good: { emoji: '😊', score: 4 },
+        normal: { emoji: '😐', score: 3 },
+        sad: { emoji: '😢', score: 2 },
+        bad: { emoji: '😤', score: 1 }
+      },
       entries: [],
       modal: false,
       selectedDate: '',
@@ -91,11 +97,25 @@ export default {
     nextMonth() { this.date = new Date(this.year, this.month + 1) },
     openMood(date) { if (date) { this.selectedDate = date; this.modal = true; this.quote = '' } },
     save(type) {
-      this.entries.push({ date: this.selectedDate, score: this.moods[type].score, emoji: this.moods[type].emoji, time: Date.now() })
+      this.entries.push({ 
+        date: this.selectedDate, 
+        score: this.moods[type].score, 
+        emoji: this.moods[type].emoji, 
+        time: Date.now() 
+      })
       this.saveEntries()
-      const quotes = { awesome: 'Супер! Так держать!', good: 'Отлично!', normal: 'Норм, бывает лучше', sad: 'Всё наладится', bad: 'Плохой день пройдёт' }
-      this.quote = quotes[type]
-      setTimeout(() => { this.quote = '' }, 1500)
+      
+      const quotes = { 
+        awesome: ['✨ Ты супер! Сияй дальше! ✨', '💫 Твоя энергия заражает всех! 💫', '🌟 Так держать, ты на высоте! 🌟'],
+        good: ['🌸 Отличный день! Продолжай в том же духе! 🌸', '💪 Ты молодец, так держать! 💪', '🎉 Позитивное настроение — твой суперсила! 🎉'],
+        normal: ['🌿 Нормально — это уже хорошо! 🌿', '🌈 Завтра будет ещё лучше! 🌈', '🧘 Спокойствие — это сила! 🧘'],
+        sad: ['🌧️ Грусть пройдёт, солнце выглянет 🌈', '💙 Ты справишься, дай себе время 💙', '🦋 Всё наладится, ты не одна 🦋'],
+        bad: ['🌊 Плохой день — не навсегда, он пройдёт 🌊', '🌺 Ты сильнее, чем кажется! Отдохни 🌺', '💜 Ты справишься, верю в тебя! 💜']
+      }
+      const list = quotes[type] || quotes.normal
+      this.quote = list[Math.floor(Math.random() * list.length)]
+      
+      setTimeout(() => { this.quote = '' }, 2500)
     }
   }
 }
@@ -113,6 +133,8 @@ export default {
 .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
 .modal-box { background: white; padding: 25px; border-radius: 25px; text-align: center; min-width: 250px; }
 .emojis { display: flex; gap: 15px; justify-content: center; margin: 15px 0; }
-.emoji { font-size: 35px; cursor: pointer; }
-.quote { color: #6b4c7a; margin: 10px 0; }
+.emoji { font-size: 35px; cursor: pointer; transition: transform 0.2s; }
+.emoji:hover { transform: scale(1.2); }
+.quote { color: #6b4c7a; margin: 10px 0; font-weight: bold; }
+button { background: #6b4c7a; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
 </style>
