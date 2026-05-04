@@ -2,43 +2,39 @@
   <div class="game-overlay" @click.self="$emit('close')">
     <div class="game-modal">
       <button class="close-game" @click="$emit('close')">✖</button>
-      <h2>🧁 Готовим кекс, чтобы поднять настроение!</h2>
+      <h2>🎨 Украшаем кексик, чтобы поднять настроение!</h2>
       
       <div class="game-content">
-        <div class="ingredients">
-          <h3>Ингредиенты:</h3>
-          <div class="ingredients-list">
+        <div class="decorations">
+          <h3>Украшения:</h3>
+          <div class="decorations-list">
             <div 
-              v-for="ing in ingredients" 
-              :key="ing.name"
-              class="ingredient"
-              :class="{ used: ing.used }"
-              @click="useIngredient(ing)"
+              v-for="dec in decorations" 
+              :key="dec.name"
+              class="decoration"
+              :class="{ used: dec.used }"
+              @click="useDecoration(dec)"
             >
-              {{ ing.emoji }} {{ ing.name }}
+              {{ dec.emoji }} {{ dec.name }}
             </div>
           </div>
         </div>
 
-        <div class="bowl" :class="{ mixing: isMixing }">
-          <div class="bowl-content">
-            <span v-if="usedIngredients.length === 0">🥣</span>
-            <span v-else>{{ usedIngredients.map(i => i.emoji).join(' ') }}</span>
+        <div class="cake-base" :class="{ decorating: isDecorating }">
+          <div class="cake-content">
+            <div class="base-cake">🧁</div>
+            <div class="toppings">
+              <span v-for="(dec, index) in usedDecorations" :key="index" class="topping">
+                {{ dec.emoji }}
+              </span>
+            </div>
           </div>
         </div>
 
-        <button 
-          v-if="usedIngredients.length === ingredients.length && !cakeReady"
-          @click="bakeCake"
-          class="bake-btn"
-        >
-          🎂 Испечь кекс!
-        </button>
-
-        <div v-if="cakeReady" class="result">
-          <div class="cake">🧁✨ ГОТОВО! ✨🧁</div>
-          <p>Твой кекс поднял настроение на +100%!</p>
-          <button @click="playAgain" class="again-btn">Приготовить ещё</button>
+        <div v-if="allDecorationsUsed" class="result">
+          <div class="cake-finished">🎨✨ ШЕДЕВР! ✨🎨</div>
+          <p>Твой украшенный кекс поднял настроение на +100%!</p>
+          <button @click="playAgain" class="again-btn">Украсить новый кекс</button>
         </div>
       </div>
     </div>
@@ -50,38 +46,48 @@ export default {
   name: 'MiniGame',
   data() {
     return {
-      ingredients: [
-        { name: 'Мука', emoji: '🌾', used: false },
-        { name: 'Яйцо', emoji: '🥚', used: false },
-        { name: 'Молоко', emoji: '🥛', used: false },
-        { name: 'Сахар', emoji: '🍬', used: false },
-        { name: 'Масло', emoji: '🧈', used: false }
+      decorations: [
+        { name: 'Посыпка', emoji: '🌈', used: false },
+        { name: 'Глазурь', emoji: '🍫', used: false },
+        { name: 'Вишенка', emoji: '🍒', used: false },
+        { name: 'Конфетти', emoji: '🎊', used: false },
+        { name: 'Орешки', emoji: '🥜', used: false },
+        { name: 'Маршмеллоу', emoji: '🍡', used: false }
       ],
-      usedIngredients: [],
-      isMixing: false,
-      cakeReady: false
+      usedDecorations: [],
+      isDecorating: false,
+      cakeFinished: false
+    }
+  },
+  computed: {
+    allDecorationsUsed() {
+      return this.decorations.length > 0 && 
+             this.decorations.every(dec => dec.used === true)
     }
   },
   methods: {
-    useIngredient(ing) {
-      if (!ing.used && !this.cakeReady) {
-        ing.used = true
-        this.usedIngredients.push(ing)
-        this.isMixing = true
-        setTimeout(() => { this.isMixing = false }, 300)
+    useDecoration(dec) {
+      if (!dec.used && !this.allDecorationsUsed) {
+        dec.used = true
+        this.usedDecorations.push(dec)
+        this.isDecorating = true
+        
+        setTimeout(() => { 
+          this.isDecorating = false 
+        }, 200)
+        
+        // Магия украшательства 😊
+        setTimeout(() => {
+          if (this.allDecorationsUsed) {
+            this.cakeFinished = true
+          }
+        }, 300)
       }
     },
-    bakeCake() {
-      this.isMixing = true
-      setTimeout(() => {
-        this.isMixing = false
-        this.cakeReady = true
-      }, 1000)
-    },
     playAgain() {
-      this.ingredients.forEach(i => i.used = false)
-      this.usedIngredients = []
-      this.cakeReady = false
+      this.decorations.forEach(d => d.used = false)
+      this.usedDecorations = []
+      this.cakeFinished = false
     }
   }
 }
@@ -121,7 +127,7 @@ export default {
   cursor: pointer;
 }
 
-.ingredients-list {
+.decorations-list {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -129,7 +135,7 @@ export default {
   margin: 15px 0;
 }
 
-.ingredient {
+.decoration {
   background: #fff;
   padding: 8px 15px;
   border-radius: 25px;
@@ -138,43 +144,71 @@ export default {
   border: 1px solid #ffccaa;
 }
 
-.ingredient:hover {
+.decoration:hover {
   transform: scale(1.05);
   background: #ffe4cc;
 }
 
-.ingredient.used {
+.decoration.used {
   opacity: 0.5;
   text-decoration: line-through;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
-.bowl {
-  background: #e8d8c0;
-  border-radius: 50% 50% 30% 30%;
-  min-height: 150px;
+.cake-base {
+  background: #f0d8b0;
+  border-radius: 30px;
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 20px 0;
-  transition: 0.1s;
+  position: relative;
+  transition:
+
+
+0.1s;
 }
 
-.bowl.mixing {
-  animation: shake 0.3s ease-in-out;
+.cake-base.decorating {
+  animation: bounce 0.3s ease;
 }
 
-.bowl-content {
-  font-size: 40px;
+.cake-content {
+  position: relative;
+  text-align: center;
 }
 
-@keyframes shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  75% { transform: rotate(-5deg); }
+.base-cake {
+  font-size: 80px;
+  display: inline-block;
+  position: relative;
 }
 
-.bake-btn {
+.toppings {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  font-size: 24px;
+  white-space: nowrap;
+  animation: float 1s ease;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes float {
+  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.decorate-btn {
   background: #ff8c5a;
   color: white;
   border: none;
@@ -182,16 +216,26 @@ export default {
   border-radius: 30px;
   font-size: 18px;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.decorate-btn:hover {
+  background: #ff6b3a;
+  transform: scale(1.05);
 }
 
 .result {
   margin-top: 20px;
 }
 
-.cake {
+.cake-finished {
   font-size: 24px;
   font-weight: bold;
   animation: bounce 0.5s ease;
+  background: linear-gradient(45deg, #ff6b3a, #ffd700);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .again-btn {
@@ -202,5 +246,17 @@ export default {
   border-radius: 25px;
   cursor: pointer;
   margin-top: 15px;
+  transition: 0.2s;
+}
+
+.again-btn:hover {
+  background: #8b5a9a;
+  transform: scale(1.05);
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
 }
 </style>
