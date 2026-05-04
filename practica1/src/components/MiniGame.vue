@@ -2,40 +2,45 @@
   <div class="game-overlay" @click.self="$emit('close')">
     <div class="game-modal">
       <button class="close-game" @click="$emit('close')">✖</button>
-      <h2>🎨 Украшаем кексик, чтобы поднять настроение!</h2>
+      <h2>🧁 Собери кекс! 🧁</h2>
+      <p>Нажми на все ингредиенты, чтобы приготовить кекс</p>
       
-      <div class="game-content">
-        <div class="decorations">
-          <h3>Украшения:</h3>
-          <div class="decorations-list">
-            <div 
-              v-for="dec in decorations" 
-              :key="dec.name"
-              class="decoration"
-              :class="{ used: dec.used }"
-              @click="useDecoration(dec)"
-            >
-              {{ dec.emoji }} {{ dec.name }}
-            </div>
+      <!-- Ингредиенты -->
+      <div class="ingredients">
+        <button 
+          v-for="(item, index) in ingredients" 
+          :key="index"
+          :class="['ingredient', { collected: item.collected }]"
+          @click="collectIngredient(index)"
+          :disabled="item.collected || gameFinished"
+        >
+          {{ item.emoji }} {{ item.name }}
+        </button>
+      </div>
+
+      <!-- Кекс который собирается -->
+      <div class="cake-container">
+        <div class="cake-base">
+          <span class="cake-emoji">🧁</span>
+          <div class="collected-items">
+            <span v-for="(item, index) in collectedList" :key="index">
+              {{ item.emoji }}
+            </span>
           </div>
         </div>
+      </div>
 
-        <div class="cake-base" :class="{ decorating: isDecorating }">
-          <div class="cake-content">
-            <div class="base-cake">🧁</div>
-            <div class="toppings">
-              <span v-for="(dec, index) in usedDecorations" :key="index" class="topping">
-                {{ dec.emoji }}
-              </span>
-            </div>
-          </div>
-        </div>
+      <!-- Прогресс -->
+      <div class="progress-bar">
+        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+      </div>
+      <p>Собрано: {{ collectedCount }} из {{ ingredients.length }}</p>
 
-        <div v-if="allDecorationsUsed" class="result">
-          <div class="cake-finished">🎨✨ ШЕДЕВР! ✨🎨</div>
-          <p>Твой украшенный кекс поднял настроение на +100%!</p>
-          <button @click="playAgain" class="again-btn">Украсить новый кекс</button>
-        </div>
+      <!-- Результат -->
+      <div v-if="gameFinished" class="result">
+        <h3>🎉 Поздравляю! Кекс готов! 🎉</h3>
+        <p>Ты отлично справился!</p>
+        <button @click="resetGame" class="play-again">Приготовить ещё</button>
       </div>
     </div>
   </div>
@@ -46,212 +51,224 @@ export default {
   name: 'MiniGame',
   data() {
     return {
-      decorations: [
-        { name: 'Посыпка', emoji: '🌈', used: false },
-        { name: 'Глазурь', emoji: '🍫', used: false },
-        { name: 'Вишенка', emoji: '🍒', used: false },
-        { name: 'Конфетти', emoji: '🎊', used: false },
-        { name: 'Орешки', emoji: '🥜', used: false },
-        { name: 'Маршмеллоу', emoji: '🍡', used: false }
-      ],
-      usedDecorations: [],
-      isDecorating: false,
-      cakeFinished: false
+      ingredients: [
+        { name: 'Мука', emoji: '🌾', collected: false },
+        { name: 'Яйцо', emoji: '🥚', collected: false },
+        { name: 'Молоко', emoji: '🥛', collected: false },
+        { name: 'Сахар', emoji: '🍬', collected: false },
+        { name: 'Масло', emoji: '🧈', collected: false }
+      ]
     }
   },
   computed: {
-    allDecorationsUsed() {
-      return this.decorations.length > 0 && 
-             this.decorations.every(dec => dec.used === true)
+    // Количество собранных ингредиентов
+    collectedCount() {
+      return this.ingredients.filter(item => item.collected).length
+    },
+    // Процент прогресса
+    progressPercent() {
+      return (this.collectedCount / this.ingredients.length) * 100
+    },
+    // Список собранных ингредиентов
+    collectedList() {
+      return this.ingredients.filter(item => item.collected)
+    },
+    // Закончена ли игра
+    gameFinished() {
+      return this.collectedCount === this.ingredients.length
     }
   },
   methods: {
-    useDecoration(dec) {
-      if (!dec.used && !this.allDecorationsUsed) {
-        dec.used = true
-        this.usedDecorations.push(dec)
-        this.isDecorating = true
-        
-        setTimeout(() => { 
-          this.isDecorating = false 
-        }, 200)
-        
-        // Магия украшательства 😊
-        setTimeout(() => {
-          if (this.allDecorationsUsed) {
-            this.cakeFinished = true
-          }
-        }, 300)
+    // Собрать ингредиент
+    collectIngredient(index) {
+      if (!this.ingredients[index].collected && !this.gameFinished) {
+        this.ingredients[index].collected = true
       }
     },
-    playAgain() {
-      this.decorations.forEach(d => d.used = false)
-      this.usedDecorations = []
-      this.cakeFinished = false
+    // Начать заново
+    resetGame() {
+      this.ingredients.forEach(item => {
+        item.collected = false
+      })
     }
   }
 }
 </script>
 
 <style scoped>
+/* Затемнение фона */
 .game-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
+/* Модальное окно */
 .game-modal {
-  background: linear-gradient(135deg, #fff5e6 0%, #ffe4e1 100%);
+  background: linear-gradient(135deg, #fff5e6, #ffe4e1);
   border-radius: 30px;
   padding: 25px;
   max-width: 500px;
   width: 90%;
   position: relative;
   text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+/* Кнопка закрытия */
 .close-game {
   position: absolute;
   top: 15px;
-  right: 15px;
+  right: 20px;
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
+  color: #999;
 }
 
-.decorations-list {
+.close-game:hover {
+  color: #333;
+}
+
+/* Заголовок */
+h2 {
+  color: #d2695a;
+  margin-bottom: 10px;
+}
+
+/* Ингредиенты */
+.ingredients {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 10px;
-  margin: 15px 0;
+  justify-content: center;
+  margin: 20px 0;
 }
 
-.decoration {
-  background: #fff;
-  padding: 8px 15px;
+.ingredient {
+  background: white;
+  border: 2px solid #ffccaa;
   border-radius: 25px;
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  transition: 0.2s;
-  border: 1px solid #ffccaa;
+  transition: all 0.3s;
+  font-weight:
+
+
+bold;
 }
 
-.decoration:hover {
+.ingredient:hover:not(:disabled) {
   transform: scale(1.05);
   background: #ffe4cc;
+  border-color: #ff8c5a;
 }
 
-.decoration.used {
-  opacity: 0.5;
+.ingredient.collected {
+  background: #90ee90;
+  border-color: #228b22;
   text-decoration: line-through;
+  opacity: 0.7;
   cursor: not-allowed;
-  filter: grayscale(0.3);
 }
 
-.cake-base {
+.ingredient:disabled {
+  cursor: not-allowed;
+}
+
+/* Контейнер с кексом */
+.cake-container {
   background: #f0d8b0;
-  border-radius: 30px;
-  min-height: 200px;
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px 0;
+  min-height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 20px 0;
-  position: relative;
-  transition:
-
-
-0.1s;
 }
 
-.cake-base.decorating {
-  animation: bounce 0.3s ease;
-}
-
-.cake-content {
+.cake-base {
   position: relative;
   text-align: center;
 }
 
-.base-cake {
+.cake-emoji {
   font-size: 80px;
-  display: inline-block;
-  position: relative;
+  display: block;
 }
 
-.toppings {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 5px;
+.collected-items {
+  margin-top: 10px;
   font-size: 24px;
-  white-space: nowrap;
-  animation: float 1s ease;
+  min-height: 50px;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+.collected-items span {
+  margin: 0 3px;
+  animation: bounce 0.5s ease;
 }
 
-@keyframes float {
-  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Прогресс-бар */
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: #e0d0c0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
 }
 
-.decorate-btn {
-  background: #ff8c5a;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: 0.2s;
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff8c5a, #ffd700);
+  transition: width 0.3s ease;
+  border-radius: 10px;
 }
 
-.decorate-btn:hover {
-  background: #ff6b3a;
-  transform: scale(1.05);
-}
-
+/* Результат */
 .result {
   margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
 }
 
-.cake-finished {
-  font-size: 24px;
-  font-weight: bold;
-  animation: bounce 0.5s ease;
-  background: linear-gradient(45deg, #ff6b3a, #ffd700);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.result h3 {
+  color: #d2695a;
+  margin: 0 0 10px 0;
 }
 
-.again-btn {
+.play-again {
   background: #6b4c7a;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 25px;
   cursor: pointer;
-  margin-top: 15px;
-  transition: 0.2s;
+  font-size: 16px;
+  margin-top: 10px;
 }
 
-.again-btn:hover {
+.play-again:hover {
   background: #8b5a9a;
   transform: scale(1.05);
+}
+
+/* Анимации */
+@keyframes bounce {
+  0% { transform: scale(0); }
+  80% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 @keyframes shake {
