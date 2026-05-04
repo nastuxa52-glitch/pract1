@@ -31,7 +31,7 @@
           </div>
         </div>
 
-        <div v-if="allDecorationsUsed" class="result">
+        <div v-if="cakeFinished" class="result">
           <div class="cake-finished">🎨✨ ШЕДЕВР! ✨🎨</div>
           <p>Твой украшенный кекс поднял настроение на +100%!</p>
           <button @click="playAgain" class="again-btn">Украсить новый кекс</button>
@@ -59,15 +59,9 @@ export default {
       cakeFinished: false
     }
   },
-  computed: {
-    allDecorationsUsed() {
-      return this.decorations.length > 0 && 
-             this.decorations.every(dec => dec.used === true)
-    }
-  },
   methods: {
     useDecoration(dec) {
-      if (!dec.used && !this.allDecorationsUsed) {
+      if (!dec.used && !this.cakeFinished) {
         dec.used = true
         this.usedDecorations.push(dec)
         this.isDecorating = true
@@ -76,9 +70,9 @@ export default {
           this.isDecorating = false 
         }, 200)
         
-        // Магия украшательства 😊
+        // Проверяем, все ли украшения использованы
         setTimeout(() => {
-          if (this.allDecorationsUsed) {
+          if (this.decorations.every(d => d.used === true)) {
             this.cakeFinished = true
           }
         }, 300)
@@ -165,10 +159,7 @@ export default {
   justify-content: center;
   margin: 20px 0;
   position: relative;
-  transition:
-
-
-0.1s;
+  transition: 0.1s;
 }
 
 .cake-base.decorating {
@@ -177,7 +168,10 @@ export default {
 
 .cake-content {
   position: relative;
-  text-align: center;
+  text-align:
+
+
+center;
 }
 
 .base-cake {
@@ -188,40 +182,28 @@ export default {
 
 .toppings {
   position: absolute;
-  top: 20%;
+  top: 15%;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 5px;
-  font-size: 24px;
+  font-size: 30px;
   white-space: nowrap;
-  animation: float 1s ease;
+  animation: float 0.3s ease;
+}
+
+.topping {
+  display: inline-block;
 }
 
 @keyframes bounce {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  50% { transform: scale(1.03); }
 }
 
 @keyframes float {
   0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
   100% { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.decorate-btn {
-  background: #ff8c5a;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.decorate-btn:hover {
-  background: #ff6b3a;
-  transform: scale(1.05);
 }
 
 .result {
@@ -252,11 +234,5 @@ export default {
 .again-btn:hover {
   background: #8b5a9a;
   transform: scale(1.05);
-}
-
-@keyframes shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  75% { transform: rotate(-5deg); }
 }
 </style>
