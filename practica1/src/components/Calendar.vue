@@ -157,20 +157,19 @@ export default {
 </script>
 
 <style scoped>
-.calendar { max-width: 500px; margin: 20px auto; background: #d4e8f0; border-radius: 20px; padding: 20px; }
+.calendar { max-width: 500px; margin: 0 auto; }
 .header { display: flex; justify-content: space-between; align-items: center; }
-.header button { background: #5aafd0; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
-.header h2 { color: #2a6f8f; }
-.weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; margin: 10px 0; color: #2a6f8f; font-weight: bold; }
+.header button { background: #6b4c7a; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; }
+.weekdays { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; margin: 10px 0; }
 .days { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; }
-.day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; background: #b8dff0; font-weight: bold; color: #1e5a7a; }
+.day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 10px; cursor: pointer; background: #f5f5f5; }
 .chart { display: flex; gap: 2px; height: 100px; align-items: flex-end; margin-top: 20px; }
-.bar { flex: 1; background: #5aafd0; min-height: 2px; border-radius: 3px 3px 0 0; }
-.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-box { background: #d4e8f0; padding: 25px; border-radius: 25px; text-align: center; min-width: 280px; }
+.bar { flex: 1; background: #6b4c7a; min-height: 2px; border-radius: 3px 3px 0 0; }
+.modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+.modal-box { background: white; padding: 25px; border-radius: 25px; text-align: center; min-width: 250px; }
 .emojis { display: flex; gap: 15px; justify-content: center; margin: 15px 0; }
-.emoji { font-size: 40px; cursor: pointer; transition: 0.2s; }
+.emoji { font-size: 35px; cursor: pointer; transition: transform 0.2s; }
 .emoji:hover { transform: scale(1.2); }
-.quote { font-size: 1.2rem; color: #2a6f8f; margin: 15px 0; font-weight: bold; line-height: 1.4; }
-button { background: #5aafd0; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+.quote { color: #6b4c7a; margin: 10px 0; font-weight: bold; }
+button { background: #6b4c7a; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
 </style>
