@@ -2,46 +2,31 @@
   <div class="game-overlay" @click.self="$emit('close')">
     <div class="game-modal">
       <button class="close-game" @click="$emit('close')">✖</button>
-      <h2>🧁 Собери кекс! 🧁</h2>
-      <p>Нажми на все ингредиенты, чтобы приготовить кекс</p>
+      <h2>🍰 Лови украшения для кекса</h2>
       
-      <!-- Ингредиенты -->
-      <div class="ingredients">
-        <button 
-          v-for="(item, index) in ingredients" 
-          :key="index"
-          :class="['ingredient', { collected: item.collected }]"
-          @click="collectIngredient(index)"
-          :disabled="item.collected || gameFinished"
-        >
-          {{ item.emoji }} {{ item.name }}
-        </button>
+      <div class="game-stats">
+        <span>⭐ Счёт: {{ score }}</span>
+        <span>❤️ Жизни: {{ lives }}</span>
       </div>
 
-      <!-- Кекс который собирается -->
-      <div class="cake-container">
-        <div class="cake-base">
-          <span class="cake-emoji">🧁</span>
-          <div class="collected-items">
-            <span v-for="(item, index) in collectedList" :key="index">
-              {{ item.emoji }}
-            </span>
-          </div>
+      <div class="game-area" @mousemove="moveCatcher" @touchmove="moveCatcher">
+        <div class="cake-catcher" :style="{ left: catcherX + 'px' }">
+          🧁
+        </div>
+        <div v-for="(item, index) in fallingItems" :key="index" 
+             class="falling-item"
+             :style="{ left: item.x + 'px', top: item.y + 'px' }">
+          {{ item.emoji }}
         </div>
       </div>
 
-      <!-- Прогресс -->
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+      <div v-if="gameOver" class="game-over">
+        <div>🎮 Игра окончена!</div>
+        <div>Твой счёт: {{ score }}</div>
+        <button @click="startGame" class="again-btn">Играть снова</button>
       </div>
-      <p>Собрано: {{ collectedCount }} из {{ ingredients.length }}</p>
-
-      <!-- Результат -->
-      <div v-if="gameFinished" class="result">
-        <h3>🎉 Поздравляю! Кекс готов! 🎉</h3>
-        <p>Ты отлично справился!</p>
-        <button @click="resetGame" class="play-again">Приготовить ещё</button>
-      </div>
+      
+      <button v-else @click="startGame" class="reset-btn">🔄 Начать заново</button>
     </div>
   </div>
 </template>
@@ -51,229 +36,217 @@ export default {
   name: 'MiniGame',
   data() {
     return {
-      ingredients: [
-        { name: 'Мука', emoji: '🌾', collected: false },
-        { name: 'Яйцо', emoji: '🥚', collected: false },
-        { name: 'Молоко', emoji: '🥛', collected: false },
-        { name: 'Сахар', emoji: '🍬', collected: false },
-        { name: 'Масло', emoji: '🧈', collected: false }
-      ]
+      score: 0,
+      lives: 3,
+      catcherX: 150,
+      fallingItems: [],
+      gameActive: true,
+      gameInterval: null
     }
   },
   computed: {
-    // Количество собранных ингредиентов
-    collectedCount() {
-      return this.ingredients.filter(item => item.collected).length
-    },
-    // Процент прогресса
-    progressPercent() {
-      return (this.collectedCount / this.ingredients.length) * 100
-    },
-    // Список собранных ингредиентов
-    collectedList() {
-      return this.ingredients.filter(item => item.collected)
-    },
-    // Закончена ли игра
-    gameFinished() {
-      return this.collectedCount === this.ingredients.length
+    gameOver() {
+      return !this.gameActive
     }
   },
   methods: {
-    // Собрать ингредиент
-    collectIngredient(index) {
-      if (!this.ingredients[index].collected && !this.gameFinished) {
-        this.ingredients[index].collected = true
+    moveCatcher(e) {
+      if (!this.gameActive) return
+      const rect = document.querySelector('.game-area').getBoundingClientRect()
+      let x = (e.clientX || e.touches?.[0]?.clientX) - rect.left - 30
+      if (x < 0) x = 0
+      if (x > rect.width - 60) x = rect.width - 60
+      this.catcherX = x
+    },
+    addFallingItem() {
+      if (!this.gameActive) return
+      const items = ['🍫', '🍬', '🍒', '🎊', '🍡', '🍭', '🍩']
+      this.fallingItems.push({
+        emoji: items[Math.floor(Math.random() * items.length)],
+        x: Math.random() * 300,
+        y: 0
+      })
+    },
+    updateGame() {
+      if (!this.gameActive) return
+      for (let i = 0; i < this.fallingItems.length; i++) {
+        this.fallingItems[i].y += 2
+        if (this.fallingItems[i].y > 190 && this.fallingItems[i].y < 230 && 
+            Math.abs(this.fallingItems[i].x - this.catcherX) < 45) {
+          this.fallingItems.splice(i, 1)
+          this.score++
+          i--
+        } else if (this.fallingItems[i].y > 260) {
+          this.fallingItems.splice(i, 1)
+          this.lives--
+          i--
+          if (this.lives <= 0) {
+            this.gameActive = false
+            clearInterval(this.gameInterval)
+          }
+        }
+      }
+      if (Math.random() < 0.15) {
+        this.addFallingItem()
       }
     },
-    // Начать заново
-    resetGame() {
-      this.ingredients.forEach(item => {
-        item.collected = false
-      })
+    startGame() {
+      this.score = 0
+      this.lives = 3
+      this.fallingItems = []
+      this.gameActive = true
+      this.catcherX = 150
+      if (this.gameInterval) clearInterval(this.gameInterval)
+      this.gameInterval = setInterval(() => this.updateGame(), 50)
     }
+  },
+  mounted() {
+    this.startGame()
+  },
+  beforeDestroy() {
+    if (this.gameInterval) clearInterval(this.gameInterval)
   }
 }
 </script>
 
 <style scoped>
-/* Затемнение фона */
 .game-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-/* Модальное окно */
+/* ФОН ОКНА ИГРЫ — КАК ФОН КАЛЕНДАРЯ (светлый, пастельный) */
 .game-modal {
-  background: linear-gradient(135deg, #fff5e6, #ffe4e1);
+  background: #e8a0a0;
   border-radius: 30px;
-  padding: 25px;
-  max-width: 500px;
+  padding: 20px;
+  max-width: 450px;
   width: 90%;
   position: relative;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  border: 1px solid #e8a0a0;
 }
 
-/* Кнопка закрытия */
+
+.game-modal h2 {
+  color: white;
+  background: #e8a0a0;
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 40px;
+  font-size: 24px;
+  margin: 5px 0 10px;
+}
+
 .close-game {
   position: absolute;
-  top: 15px;
-  right: 20px;
-  background: none;
+  top: 10px;
+  right: 10px;
+  background: #e8a0a0;
   border: none;
-  font-size: 24px;
+  font-size: 18px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
   cursor: pointer;
-  color: #999;
 }
 
 .close-game:hover {
-  color: #333;
+  background: #e8a0a0;
 }
 
-/* Заголовок */
-h2 {
-  color: #d2695a;
-  margin-bottom: 10px;
-}
-
-/* Ингредиенты */
-.ingredients {
+.game-stats {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin: 20px 0;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: #F5EDE0;
+  border-radius: 15px;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #5A4A3A;
 }
 
-.ingredient {
-  background: white;
-  border: 2px solid #ffccaa;
-  border-radius: 25px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-weight:
-
-
-bold;
-}
-
-.ingredient:hover:not(:disabled) {
-  transform: scale(1.05);
-  background: #ffe4cc;
-  border-color: #ff8c5a;
-}
-
-.ingredient.collected {
-  background: #90ee90;
-  border-color: #228b22;
-  text-decoration: line-through;
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.ingredient:disabled {
-  cursor: not-allowed;
-}
-
-/* Контейнер с кексом */
-.cake-container {
-  background: #f0d8b0;
-  border-radius: 20px;
-  padding: 20px;
-  margin: 20px 0;
-  min-height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.cake-base {
+/* ИГРОВАЯ ОБЛАСТЬ — НЕЖНО-ГОЛУБАЯ (как фон календаря) */
+.game-area {
   position: relative;
-  text-align: center;
-}
-
-.cake-emoji {
-  font-size: 80px;
-  display: block;
-}
-
-.collected-items {
-  margin-top: 10px;
-  font-size: 24px;
-  min-height: 50px;
-}
-
-.collected-items span {
-  margin: 0 3px;
-  animation: bounce 0.5s ease;
-}
-
-/* Прогресс-бар */
-.progress-bar {
-  width: 100%;
-  height: 20px;
-  background: #e0d0c0;
-  border-radius: 10px;
-  overflow: hidden;
+  height: 300px;
+  background: #E8F0F5;
+  border-radius: 20px;
   margin: 15px 0;
+  overflow: hidden;
+  cursor: none;
+  border: 1px solid #D4E0E8;
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #ff8c5a, #ffd700);
-  transition: width 0.3s ease;
-  border-radius: 10px;
+.cake-catcher {
+  position: absolute;
+  bottom: 15px;
+  font-size: 50px;
+  transition: left 0.05s linear;
+  pointer-events: none;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
 }
 
-/* Результат */
-.result {
-  margin-top: 20px;
+.falling-item {
+  position: absolute;
+  font-size: 30px;
+  pointer-events: none;
+}
+
+.game-over {
+  margin-top: 15px;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #F5EDE0;
   border-radius: 15px;
 }
 
-.result h3 {
-  color: #d2695a;
-  margin: 0 0 10px 0;
+.game-over div {
+  margin: 8px 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #5A4A3A;
 }
 
-.play-again {
-  background: #6b4c7a;
+/* КНОПКА НАЧАТЬ ЗАНОВО */
+.reset-btn {
+  background: #a8a8c8;
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 25px;
   cursor: pointer;
-  font-size: 16px;
   margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: 0.2s;
 }
 
-.play-again:hover {
-  background: #8b5a9a;
-  transform: scale(1.05);
+.reset-btn:hover {
+  background: #a8a8c8;
 }
 
-/* Анимации */
-@keyframes bounce {
-  0% { transform: scale(0); }
-  80% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+.again-btn {
+  background: #a8a8c8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
-@keyframes shake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(5deg); }
-  75% { transform: rotate(-5deg); }
+.again-btn:hover {
+  background: #a8a8c8;
 }
 </style>
