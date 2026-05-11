@@ -58,9 +58,10 @@ export default {
       this.$emit('save', {
         date: this.selectedDate,
         mood: this.selectedMood.type,
+        moodLabel: this.selectedMood.label,
         emoji: this.selectedMood.emoji
       })
-      this.$emit('close')
+      // НЕ закрываем окно, чтобы можно было добавить ещё эмоцию
     }
   }
 }
