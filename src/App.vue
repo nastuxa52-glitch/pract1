@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div id="app">
     <header>
       <h1>🌸 Трекер настроения</h1>
       <p>Отмечай эмоции, получай советы и поднимай настроение!</p>
@@ -13,7 +13,7 @@
     <MiniGame v-if="showGame" @close="showGame = false" />
 
     <footer>
-      <p>Каждый день — новая эмоция ✨</p>
+      <p>✨ Каждый день — новая эмоция ✨</p>
     </footer>
   </div>
 </template>
@@ -25,7 +25,11 @@ import MiniGame from './components/MiniGame.vue'
 
 export default {
   name: 'App',
-  components: { Calendar, FloatButton, MiniGame },
+  components: {
+    Calendar,
+    FloatButton,
+    MiniGame
+  },
   data() {
     return {
       showGame: false
@@ -47,12 +51,11 @@ export default {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #f5f0ff 0%, #ffe4e1 100%);
-  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-.app {
+#app {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
@@ -64,26 +67,20 @@ body {
 header {
   text-align: center;
   padding: 30px 20px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 30px;
   margin-bottom: 20px;
 }
 
 header h1 {
-  font-size: 2.5rem;
-  color: #6b4c7a;
-  margin-bottom: 10px;
-}
-
-header p {
-  color: #8a6a9a;
-  font-size: 1.1rem;
+  font-size: 2rem;
+  color: #2c5f7a;
 }
 
 footer {
   text-align: center;
   padding: 20px;
-  color: #aaa;
+  color: #000000;
   margin-top: auto;
 }
 </style>
